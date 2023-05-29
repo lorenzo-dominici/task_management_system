@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{ project.name }}</h1>
+  <p>{{ project.owner }}</p>
+  <p>{{ project.description }}</p>
+  <p>Status: {{ project.get_status_display }}</p>
+  <p>Created: {{ project.creation_date }}</p>
+  {% if project.closing_date %}
+    <p>Closing: {{ project.closing_date }}</p>
+  {% endif %}
+  <h2>Collaborators:</h2>
+  <ul>
+  {% for collaborator in project.collaborators %}
+    <li>{{ collaborator.username }}</li>
+  {% endfor %}
+  </ul>
+{% endblock %}

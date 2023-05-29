@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+from django.conf import settings
 
 class Project(models.Model):
     PUBLIC = '+'
@@ -16,7 +17,7 @@ class Project(models.Model):
         (CLOSED, 'closed')
     ]
 
-    owner = models.ForeignKey('settings.AUTH_USER_MODEL', on_delete=models.RESTRICT, related_name='projects')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name='projects')
     name = models.CharField(max_length=256)
     description = models.TextField()
     visibility = models.CharField(max_length=1, choices=VISIBILITY, default=PRIVATE)
@@ -57,7 +58,7 @@ class Project(models.Model):
 class Role(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='roles')
     name = models.CharField(max_length=256)
-    collaborators = models.ManyToManyField('settings.AUTH_USER_MODEL', related_name='roles', through='Collaboration')
+    collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='roles', through='Collaboration')
 
     class Meta:
         constraints = [
@@ -68,7 +69,7 @@ class Role(models.Model):
         return self.name
     
 class Collaboration(models.Model):
-    collaborator = models.ForeignKey('settings.AUTH_USER_MODEL', on_delete=models.RESTRICT)
+    collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     joining_date = models.DateTimeField(auto_now_add=True)
     dismissing_date = models.DateTimeField(null=True, default=None)
@@ -108,7 +109,7 @@ class Task(models.Model):
     status = models.CharField(max_length=1, choices=STATUS, default=CREATED)
     creation_date = models.DateTimeField(auto_now_add=True)
     roles = models.ManyToManyField(Role, related_name='tasks')
-    collaborator = models.ForeignKey('settings.AUTH_USER_MODEL', on_delete=models.RESTRICT, related_name='tasks', null=True, default=None)
+    collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name='tasks', null=True, default=None)
     start_date = models.DateTimeField(null=True, default=None)
     request_date = models.DateTimeField(null=True, default=None)
     end_date = models.DateTimeField(null=True, default=None)
@@ -117,7 +118,7 @@ class Task(models.Model):
         get_latest_by = ['creation_date', 'start_date']
         constraints = [
             models.UniqueConstraint(fields=['project', 'name'], name='unique_task'),
-            models.CheckConstraint(check=models.Q(roles__project=models.F('project')), name='roles_task')
+            # models.CheckConstraint(check=models.Q(roles__project=models.F('project')), name='roles_task')
         ]
 
     def __str__(self):
