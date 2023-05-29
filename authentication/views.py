@@ -1,17 +1,9 @@
-from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView
-from django.views.generic.edit import CreateView
-from .forms import LoginForm, UserCreationForm
+from django.views.generic import CreateView
 
-class LoginView(DjangoLoginView):
-    template_name = 'auth/login.html'
-    authentication_form = LoginForm
+from .forms import UserCreationForm
 
-class LogoutView(DjangoLogoutView):
-    template_name = 'auth/logout.html'
-
-class RegisterView(CreateView):
+class SignUpView(CreateView):
     form_class = UserCreationForm
-    template_name = 'auth/register.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy("login")
+    template_name = "registration/signup.html"

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}Default Title{% endblock %}</title>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="">Home</a></li>
+        <li><a href="{% url 'login' %}">Login</a></li>
+        <li><a href="{% url 'signup' %}">SignUp</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      {% block content %}Default content{% endblock %}
+    </main>
+  </body>
+</html>

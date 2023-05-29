@@ -8,13 +8,19 @@ class UserCreationForm(DjangoUserCreationForm):
 
     class Meta:
         model = User
-        fields = DjangoUserCreationForm.Meta.fields + ('email',)
+        fields = (
+            "username",
+            "email"
+        )
 
 class UserChangeForm(DjangoUserChangeForm):
 
     class Meta:
         model = User
-        fields = DjangoUserChangeForm.Meta.fields
+        fields = (
+            "username",
+            "email"
+        )
 
 
 class LoginForm(AuthenticationForm):
