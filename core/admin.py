@@ -9,4 +9,4 @@ models = [
 
 ]
 
-admin.register(models)
+admin.site.register(models)
