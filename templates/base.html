@@ -1,19 +1,43 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
   <head>
-    <title>{% block title %}Default Title{% endblock %}</title>
+    <title>{% block title %}Task Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block meta %}{% endblock %}
   </head>
   <body>
-    <nav>
+    <nav class = "top">
+      <div class = "logo"><a href="{% url 'home' %}"><img src="{% static 'media/logo.png' %}" alt="LOGO"><span>Task Management System</span></a></div>
       <ul>
-        <li><a href="">Home</a></li>
-        <li><a href="{% url 'login' %}">Login</a></li>
-        <li><a href="{% url 'signup' %}">SignUp</a></li>
+        {% block top %}
+        {% endblock %}
+      </ul>
+      <div class = "user">
+        {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'signup' %}">SignUp</a>
+        {% else %}
+        <a href="">{{user.username}}</a>
+        {% endif %}
+      </div>
+    </nav>
+    <nav class = "left">
+      <ul>
+        {% block left %}
+        {% endblock %}
       </ul>
     </nav>
-
     <main>
-      {% block content %}Default content{% endblock %}
+      {% block content %}
+
+      {% endblock %}
     </main>
+    <nav class = "right">
+      <ul>
+        {% block right %}
+        {% endblock %}
+      </ul>
+    </nav>
   </body>
 </html>

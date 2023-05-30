@@ -4,7 +4,7 @@
   <h1>Task List</h1>
   <ul>
   {% for task in tasks %}
-    <li><a href="{% url 'project' project.pk %}">{{ task.name }}</a></li>
+    <li><a href="{% url 'core:task-detail' task.project.owner task.project.name task.name %}">{{ task.name }}@{{ task.project.owner }}/{{ task.project.name }}</a></li>
   {% endfor %}
   </ul>
 {% endblock %}

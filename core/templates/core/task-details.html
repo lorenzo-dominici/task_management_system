@@ -1,17 +1,37 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>{{ task.name }}</h1>
+  <h1>{{ task.name }}@{{ task.project.owner }}/{{ task.project.name }}</h1>
   <p>{{ task.description }}</p>
+  <p>Visibility: {{ task.get_visibility_display }}</p>
   <p>Status: {{ task.get_status_display }}</p>
-  <p>Created: {{ task.creation_date }}</p>
-  {% if task.closing_date %}
-    <p>Closing: {{ task.closing_date }}</p>
-  {% endif %}
-  <h2>Collaborators:</h2>
+  <p>Creation Date: {{ task.creation_date }}</p>
+  <p>Roles:</p>
   <ul>
-  {% for collaborator in task.collaborators %}
-    <li>{{ collaborator.username }}</li>
-  {% endfor %}
+    {% for role in task.roles.all %}
+      <li>{{ role.name }}</li>
+    {% empty %}
+      <li>No roles assigned</li>
+    {% endfor %}
   </ul>
+  {% if task.collaborator %}
+    <p>Collaborator: {{ task.collaborator }}</p>
+  {% else %}
+    <p>No collaborator assigned</p>
+  {% endif %}
+  {% if task.start_date %}
+    <p>Start Date: {{ task.start_date }}</p>
+  {% else %}
+    <p>No start date assigned</p>
+  {% endif %}
+  {% if task.request_date %}
+    <p>Request Date: {{ task.request_date }}</p>
+  {% else %}
+    <p>No request date assigned</p>
+  {% endif %}
+  {% if task.end_date %}
+    <p>End Date: {{ task.end_date }}</p>
+  {% else %}
+    <p>No end date assigned</p>
+  {% endif %}
 {% endblock %}
