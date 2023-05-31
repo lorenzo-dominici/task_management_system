@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block create_title %}{% endblock create_title %}{% endif %}{% endblock %}
+
+{% block top %}{% if object %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block top %}{% endblock create_top %}{% endif %}{% endblock %}
+
+{% block content %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_div }}
+    <input class = "success" type = "submit" value ="{% if object %}Save{% else %}Create{% endif %}">
+  </form>
+{% endblock %}

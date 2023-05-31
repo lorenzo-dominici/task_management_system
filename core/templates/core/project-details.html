@@ -2,16 +2,21 @@
 
 {% block title %}{{project.owner}}/{{project.name}}{% endblock title%}
 
-{% block top %}<a href="#">{{project.owner}}</a>/<a href="">{{project.name}}{% endblock top %}
+{% block top %}<a href="{% url 'core:user-details' project.owner.username' %}">{{project.owner}}</a>/<a href="{% url 'core:project-details' project.name %}">{{project.name}}{% endblock top %}
 
 {% block content %}
-  <h1>{{ project.owner }}/{{ project.name }}</h1>
   <p>{{ project.description }}</p>
   <p>Status: {{ project.get_status_display }}</p>
   <p>Created: {{ project.creation_date }}</p>
   {% if project.closing_date %}
     <p>Closing: {{ project.closing_date }}</p>
   {% endif %}
+  <h2>Roles:</h2>
+  <ul>
+  {% for role in project.roles.all %}
+    <li>{{ role.name }}</li>
+  {% endfor %}
+  </ul>
   <h2>Collaborators:</h2>
   <ul>
   {% for collaborator in project.collaborators %}

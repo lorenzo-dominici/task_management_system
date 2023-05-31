@@ -61,6 +61,7 @@ class Project(models.Model):
 class Role(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='roles')
     name = models.CharField(max_length=256)
+    description = models.TextField()
     collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='roles', through='Collaboration')
 
     class Meta:

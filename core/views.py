@@ -1,64 +1,106 @@
-from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.views.generic import ListView
-from django.views.generic import DetailView
-from .models import Project
-from .models import Task
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView
+from django.db.models import Count
+from .models import Project, Task, Role
+from .forms import ProjectForm, RoleForm, TaskForm
 
-class ProjectListView(ListView):
-    template_name = 'core/project-list.html'
-    context_object_name = 'projects'
+#TODO: implement pagination
+#TODO: implement search/filters
 
-    def get_queryset(self):
-        projects = Project.objects.filter(visibility = Project.PUBLIC)
-        if self.request.user.is_authenticated:
-            projects = projects.union(Project.objects.filter(owner = self.request.user))
-            projects = projects.union(Project.objects.filter(roles__collaborators__in = [self.request.user]).distinct())
-        return projects
+def list_users(request):
+    users = settings.AUTH_USER_MODEL.objects.exclude(username = request.user.username).annotate(assignations_count = Count('tasks')).order_by('-assignations_count')
+    return render(request, 'core/users-list.html', {'users': users})
 
-class ProjectDetailView(DetailView):
-    template_name = 'core/project-details.html'
-    context_object_name = 'project'
+def list_projects(request):
+    projects = Project.objects.filter(visibility = Project.PUBLIC)
+    if request.user.is_authenticated:
+        projects = projects.union(Project.objects.filter(owner = request.user))
+        projects = projects.union(Project.objects.filter(roles__collaborators__in = [request.user]).distinct())
+    return render(request, 'core/projects-list.html', {'projects': projects})
 
-    def get_queryset(self):
-        try:
-            project = Project.objects.get(name = self.kwargs['project_name'], owner = self.kwargs['username'])
-        except Project.DoesNotExist:
-            return Project.objects.none()
-        if project.visibility != Project.PUBLIC:
-            if self.request.user.is_authenticated and (self.request.user == project.owner or self.request.user in project.collaborators):
-                return project
-            else:
-                raise PermissionDenied
-        else:
-            return project
+@login_required
+def list_roles(request):
+    roles = Role.objects.filter(project__in = Project.objects.filter(owner = request.user))
+    roles = roles.union(Role.objects.filter(project__in = Project.objects.filter(roles__collaborators__in = [request.user]).distinct()))
+    return render(request, 'core/roles-list.html', {'roles': roles})
 
-class TaskListView(LoginRequiredMixin, ListView):
-    template_name = 'core/task-list.html'
-    context_object_name = 'tasks'
+@login_required
+def list_tasks(request):
+    tasks = Task.objects.filter(project__in = Project.objects.filter(owner = request.user))
+    tasks = tasks.union(Task.objects.filter(roles__collaborators__in = [request.user]).distinct())
+    tasks = tasks.union(Task.objects.filter(project__in = Project.objects.filter(roles__collaborators__in = [request.user]).distinct()))
+    return render(request, 'core/tasks-list.html', {'tasks': tasks})
 
-    def get_queryset(self):
-        tasks = Task.objects.filter(project__in = Project.objects.filter(owner = self.request.user))
-        tasks = tasks.union(Task.objects.filter(roles__collaborators__in = [self.request.user]).distinct())
-        tasks = tasks.union(Task.objects.filter(project__in = Project.objects.filter(roles__collaborators__in = [self.request.user]).distinct()))
+def view_user(request, username):
+    user = get_object_or_404(settings.AUTH_USER_MODEL, username = username)
+    return render(request, 'core/user-details.html', {'user': user})
 
-class TaskDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'core/task-details.html'
-    context_object_name = 'task'
-
-    def get_queryset(self):
-        try:
-            task = Task.objects.get(name = self.kwargs['task_name'], project = Project.objects.get(name = self.kwargs['project_name'], owner = self.kwargs['username']))
-            owned = task.filter(project__name = self.request.user)
-            assigned = task.filter(collaborators__in = self.request.user)
-            available = task.filter(visibility = Task.PUBLIC, roles__collaborators__in = [self.request.user]).distinct()
-            task = task.union(owned).union(assigned).union(available)
-            if task.count() != 1:
-                raise PermissionDenied
-            else:
-                task = task.get()
-        except Task.DoesNotExist:
-            return Task.objects.none()
-        return task
+def view_project(request, project_name, username):
+    project = get_object_or_404(Project, name = project_name, owner__username = username)
+    if project.visibility != Project.PUBLIC:
+        if request.user.is_authenticated and (request.user == project.owner or request.user in project.collaborators):
+            return render(request, 'core/project-details.html', {'project': project})
+        raise PermissionDenied
+    return render(request, 'core/project-details.html', {'project': project})
     
+def view_role(request, username, project_name, role_name):
+    role = get_object_or_404(Role, name = role_name, project__name = project_name, project__owner__username = username)
+    if role.project.visibility != Project.PUBLIC:
+        if request.user.is_authenticated and (request.user == role.project.owner or request.user in role.project.collaborators):
+            return render(request, 'core/role-details.html', {'role': role})
+        raise PermissionDenied
+    return render(request, 'core/role-details.html', {'role': role})
+
+@login_required
+def view_task(request, task_name, username, project_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if not (request.user in task.project.collaborators and task.visibility == Task.PUBLIC) and request.user != task.project.owner:
+        raise PermissionDenied
+    render(request, 'core/task-details.html', {'task': task})
+
+@login_required
+def edit_project(request, username = None, project_name = None):
+    if request.user.username != username:
+        raise PermissionDenied
+    project = get_object_or_404(Project, name = project_name, owner = request.user) if username and project_name else None
+    form = ProjectForm(request.POST or None, instance = project, exclude = ['name'] if project else [])
+    if request.method == 'POST' and form.is_valid():
+        project = form.save(commit=False)
+        project.owner = request.user
+        project.save()
+        return redirect('core:project_details', username = username, project_name = project_name)
+    return render(request, 'project_edit.html', {'form': form})
+
+@login_required
+def edit_role(request, username = None, project_name = None, role_name = None):
+    if request.user.username != username:
+        raise PermissionDenied
+    project = get_object_or_404(Project, name = project_name, owner = request.user) if username and project_name else None
+    role = get_object_or_404(Role, name = role_name, project = project) if project and role_name else None
+    form = RoleForm(request.POST or None, instance = role, exclude = ['name'] if role else [])
+    if request.method == 'POST' and form.is_valid():
+        role = form.save(commit=False)
+        role.project = project
+        role.save()
+        return redirect('core:role_details', username = username, project_name = project_name)
+    return render(request, 'role_edit.html', {'form': form})
+
+@login_required
+def edit_task(request, username = None, project_name = None, task_name = None):
+    if request.user.username != username:
+        raise PermissionDenied
+    project = get_object_or_404(Project, name = project_name, owner = request.user) if username and project_name else None
+    task = get_object_or_404(Task, name = task_name, project = project) if project and task_name else None
+    form = TaskForm(request.POST or None, instance = task, exclude = ['name'] if task else [], project = project)
+    if request.method == 'POST' and form.is_valid():
+        task = form.save(commit=False)
+        task.project = project
+        task.save()
+        task.save_m2m()
+        return redirect('core:project_details', username = username, project_name = project_name)
+    return render(request, 'project_edit.html', {'form': form})

@@ -2,7 +2,7 @@
 
 {% block title %}{{task.name}}@{{task.project.owner}}/{{task.project.name}}{% endblock title %}
 
-{% block top %}<a href="">{{task.name}}</a>@<a href="#">{{task.project.owner}}</a>/<a href="{% url 'core:project-details' task.project.owner task.project.name %}">{{task.project.name}}</a>{% endblock top %}
+{% block top %}<a href="{% url 'core:task-details' task.project.owner.username task.project.name task.name %}">{{task.name}}</a>@<a href="{% url 'core:user-details' task.project.owner.username' %}">{{task.project.owner}}</a>/<a href="{% url 'core:project-details' task.project.owner.username task.project.name %}">{{task.project.name}}</a>{% endblock top %}
 
 {% block content %}
   <p>{{ task.description }}</p>
