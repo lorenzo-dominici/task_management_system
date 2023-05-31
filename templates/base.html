@@ -2,48 +2,48 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TMS &sdot; {% block title %}Home{% endblock %}</title>
+    <title>TMS &sdot; {% block title %}Home{% endblock title %}</title>
     <link rel="icon" type="image/x-icon" href="{% static 'media/logo.png' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    {% block meta %}{% endblock %}
+    {% block meta %}{% endblock meta %}
   </head>
   <body>
     <nav class = "top">
       <div class = "logo"><a href="{% url 'home' %}"><img src="{% static 'media/logo.png' %}" alt="LOGO"><span>Task Management System</span></a></div>
       <div class = "head">
         {% block top %}
-        {% endblock %}
+        {% endblock top %}
       </div>
       <div class = "user">
-        {% if not user.is_authenticated %}
+        {% if not request.user.is_authenticated %}
         <a href="{% url 'login' %}">Login</a>
         <a href="{% url 'signup' %}">SignUp</a>
         {% else %}
-        <a href="{% url 'core:user-details' user.username %}">{{user.username}}</a>
+        <a href="{% url 'core:user-details' request.user.username %}">{{request.user.username}}</a>
         {% endif %}
       </div>
     </nav>
     <nav class = "left">
       <ul>
         {% block left %}
-        <li><a href="#">Users</a></li>
+        <li><a href="{% url 'core:users-list' %}">Users</a></li>
         <li><a href="{% url 'core:projects-list' %}">Projects</a></li>
-        {% if user.is_authenticated %}
-        <li><a href="{% url 'core:tasks-list' %}">Roles</a></li>
+        {% if request.user.is_authenticated %}
+        <li><a href="{% url 'core:roles-list' %}">Roles</a></li>
         <li><a href="{% url 'core:tasks-list' %}">Tasks</a></li>
         {% endif %}
-        {% endblock %}
+        {% endblock left %}
       </ul>
     </nav>
     <main>
       {% block content %}
 
-      {% endblock %}
+      {% endblock content %}
     </main>
     <nav class = "right">
       <ul>
         {% block right %}
-        {% endblock %}
+        {% endblock right %}
       </ul>
     </nav>
   </body>

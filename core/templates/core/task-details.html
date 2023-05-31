@@ -39,3 +39,10 @@
     {% endfor %}
   </ul>
 {% endblock content %}
+
+{% block right %}
+  {% if request.user == task.project.owner %}
+  <li><a href="{% url 'core:task-edit' task.project.owner.username task.project.name task.name %}">Edit Task</a></li>
+  <li><a href="{% url 'core:task-new' task.project.owner.username task.project.name %}">Create Task</a></li>
+  {% endif %}
+{% endblock right %}

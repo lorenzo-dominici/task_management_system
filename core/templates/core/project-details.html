@@ -24,3 +24,12 @@
   {% endfor %}
   </ul>
 {% endblock content %}
+
+{% block right %}
+  {% if request.user == project.owner %}
+  <li><a href="{% url 'core:project-edit' project.owner.username project.name %}">Edit Project</a></li>
+  <li><a href="{% url 'core:role-new' project.owner.username project.name %}">Create Role</a></li>
+  <li><a href="{% url 'core:task-new' project.owner.username project.name %}">Create Task</a></li>
+  {% endif %}
+  <li><a href="{% url 'core:project-new' %}">Create Project</a></li>
+{% endblock right %}

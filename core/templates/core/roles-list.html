@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Roles{% endblock title %}
+
+{% block top %}Roles{% endblock top %}
+
+{% block content %}
+  <ul>
+  {% for role in roles %}
+    <li><a href="{% url 'core:role-details' role.project.owner.username role.project.name role.name %}">{{ role.name }}@{{ role.project.owner }}/{{ role.project.name }}</a></li>
+  {% endfor %}
+  </ul>
+{% endblock content %}
+

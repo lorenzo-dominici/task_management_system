@@ -1,10 +1,8 @@
 from django.conf import settings
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
 from django.db.models import Count
 from .models import Project, Task, Role
 from .forms import ProjectForm, RoleForm, TaskForm
@@ -13,7 +11,7 @@ from .forms import ProjectForm, RoleForm, TaskForm
 #TODO: implement search/filters
 
 def list_users(request):
-    users = settings.AUTH_USER_MODEL.objects.exclude(username = request.user.username).annotate(assignations_count = Count('tasks')).order_by('-assignations_count')
+    users = get_user_model().objects.exclude(username = request.user.username).annotate(assignations_count = Count('tasks')).order_by('-assignations_count')
     return render(request, 'core/users-list.html', {'users': users})
 
 def list_projects(request):
@@ -37,7 +35,7 @@ def list_tasks(request):
     return render(request, 'core/tasks-list.html', {'tasks': tasks})
 
 def view_user(request, username):
-    user = get_object_or_404(settings.AUTH_USER_MODEL, username = username)
+    user = get_object_or_404(get_user_model(), username = username)
     return render(request, 'core/user-details.html', {'user': user})
 
 def view_project(request, project_name, username):

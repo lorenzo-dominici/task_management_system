@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import Project
 from .models import Role
 from .models import Task
@@ -14,7 +15,7 @@ class RoleForm(forms.ModelForm):
         fields = ['name', 'description']
 
 class TaskForm(forms.ModelForm):
-    roles = forms.ModelMultipleChoiceField(queryset=Role.objects.none(), widget=forms.FilteredSelectMultiple)
+    roles = forms.ModelMultipleChoiceField(queryset=Role.objects.none(), widget=FilteredSelectMultiple('Roles', is_stacked = False))
 
     class Meta:
         model = Task
