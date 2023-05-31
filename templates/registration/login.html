@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}Log In{% endblock title %}
 
 {% block content %}
-<h2>Log In</h2>
-<form method="post">{% csrf_token %}
+<div class = "title">Log In</div>
+<form method="post">
+  {% csrf_token %}
   {{ form.as_div }}
-  <button class="" type="submit">Log In</button>
+  <input class="success" type="submit" value="Log In">
 </form>
-<p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+<div><a href="{% url 'password_reset' %}">Forgot your password?</a></div>
 {% endblock content %}

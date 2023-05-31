@@ -7,5 +7,5 @@
     <li><a href="{% url 'core:task-detail' task.project.owner task.project.name task.name %}">{{ task.name }}@{{ task.project.owner }}/{{ task.project.name }}</a></li>
   {% endfor %}
   </ul>
-{% endblock %}
+{% endblock content %}
 

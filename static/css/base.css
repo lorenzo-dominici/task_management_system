@@ -1,13 +1,15 @@
 :root {
-    --bg: #010409;
+    --bg: #0d1117;
     --nav: #161b22;
-    --menu: #0d1117;
     --button: #21262d;
     --border: #30363d;
+    --border-hover: #8b949e;
+    --highlight: #2f81f7;
     --text-1: #ecf2f8;
     --text-2: #c6cdd5;
     --text-3: #89929b;
-    --success: #7ce38b;
+    --success: #238636;
+    --success-hover: #2ea043;
     --warning: #faa356;
     --danger: #fa7970;
     --low: #a2d2fb;
@@ -20,6 +22,11 @@
     margin: 0 0;
     padding: 0 0;
     font-family: sans-serif;
+    line-height: 1;
+    color: var(--text-1);
+}
+
+html {
     font-size: 16px;
 }
 
@@ -32,19 +39,86 @@ body {
     grid-template-areas: 'top top top' 'left main right';
 }
 
+input:not(input[type="submit"]) {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--bg);
+    outline: none;
+    color: var(--text-1);
+    padding: .5em 1em;
+}
+
+input:not(input[type="submit"]):focus {
+    outline: none;
+    border-color: var(--highlight);
+}
+
+button, input[type="submit"] {
+    background-color: var(--button);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: .5em 1em;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: var(--border);
+    border-color: var(--border-hover);
+}
+
+
+form > div {
+    font-size: 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas: 'label input';
+}
+
+form > div > label {
+    display: block;
+    grid-area: label;
+    background-color: var(--button);
+    border: 1px solid var(--border);
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    padding: .5em 1em;
+    text-align: center;
+    color: var(--text-1);
+    font-size: 1rem;
+}
+
+form > div > input:not(input[type="submit"]) {
+    display: block;
+    grid-area: input;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    font-size: 1rem;
+    height: 100%;
+}
+
+.success {
+    background-color: var(--success) !important;
+    border-color: var(--success) !important;
+}
+
+.success:hover {
+    background-color: var(--success-hover) !important;
+    border-color: var(--success-hover) !important;
+}
+
 .top {
     grid-area: top;
     display: flex;
     flex-direction: row;
-
     background-color: var(--nav);
+    height: 4rem;
 }
 
 .top > .logo {
     display: block;
     flex-basis: 20%;
     text-align: center;
-    line-height: 3rem;
     overflow-x: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -55,26 +129,26 @@ body {
 }
 
 .top > .user {
-    display: block;
     flex-basis: 20%;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    align-items: center;
 }
 
 .top > .logo > a {
+    height: 100%;
     text-decoration: none;
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: var(--text-1);
     font-weight: bold;
-    line-height: 3rem;
+    padding: .5rem 0;
     display: flex;
     flex-direction: row;
     gap: .5rem;
     align-items: center;
     justify-content: flex-start;
     white-space: nowrap;
-    
 }
 
 .top > .logo > a > img {
@@ -84,10 +158,16 @@ body {
 }
 
 .top > .user > a {
+    display: block;
     text-decoration: none;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    font-size: 1rem;
+    padding: 1rem 2rem;
     color: var(--text-1);
+    font-weight: bold;
+}
+
+.top > .user > a:hover {
+    color: var(--text-3);
 }
 
 .top > ul {
@@ -107,16 +187,14 @@ body {
 
 .left {
     grid-area: left;
-    
     border-right: 1px solid var(--border);
-    background-color: var(--menu);
+    background-color: var(--bg);
 }
 
 .right {
     grid-area: right;
-
     border-left: 1px solid var(--border);
-    background-color: var(--menu);
+    background-color: var(--bg);
 }
 
 .top > ul > li, .right > ul > li, .left > ul > li {
@@ -137,7 +215,7 @@ main {
     overflow-y: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
-
+    padding: 1.5rem;
     background-color: var(--bg);
 }
 
@@ -145,10 +223,40 @@ main::-webkit-scrollbar {
     display: none;
 }
 
-.fl {
-    float: left;
+main > div.title {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
 }
 
-.fr {
-    float: right;
+main > form {
+    width: 60%;
+    margin: 2rem auto;
+}
+
+main > form > div {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+main > form > input[type="submit"] {
+    display: block;
+    margin: 0 auto;
+}
+
+main > form ~ div > a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: var(--highlight);
+}
+
+main > form ~ div > a:hover {
+    text-decoration: underline;
+}
+
+main > p {
+    text-align: center;
+    color: var(--text-2);
 }
