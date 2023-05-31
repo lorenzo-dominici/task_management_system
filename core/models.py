@@ -1,5 +1,5 @@
 import datetime
-from django.db import models
+from django.db import IntegrityError, models
 from django.conf import settings
 
 class Project(models.Model):
@@ -51,6 +51,9 @@ class Project(models.Model):
         self.visibility = self.CLOSED
         self.save()
 
+    def is_deletable(self):
+        return Collaboration.objects.filter(role__project = self).count() == 0
+
     @property
     def collaborators(self):
         return self.roles.collaborators.distinct()
@@ -67,6 +70,9 @@ class Role(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def is_deletable(self):
+        return Collaboration.objects.filter(role = self).count() == 0
     
 class Collaboration(models.Model):
     collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
@@ -105,11 +111,12 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
     name = models.CharField(max_length=256)
     description = models.TextField()
+    priority = models.FloatField(default=0.5)
     visibility = models.CharField(max_length=1, choices=VISIBILITY, default=PRIVATE)
     status = models.CharField(max_length=1, choices=STATUS, default=CREATED)
+    roles = models.ManyToManyField(Role, related_name='tasks', through='TaskRole')
+    collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='tasks', through='Assignation')
     creation_date = models.DateTimeField(auto_now_add=True)
-    roles = models.ManyToManyField(Role, related_name='tasks')
-    collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name='tasks', null=True, default=None)
     start_date = models.DateTimeField(null=True, default=None)
     request_date = models.DateTimeField(null=True, default=None)
     end_date = models.DateTimeField(null=True, default=None)
@@ -118,7 +125,7 @@ class Task(models.Model):
         get_latest_by = ['creation_date', 'start_date']
         constraints = [
             models.UniqueConstraint(fields=['project', 'name'], name='unique_task'),
-            # models.CheckConstraint(check=models.Q(roles__project=models.F('project')), name='roles_task')
+            models.CheckConstraint(check=models.Q(priority__gte=0, priority__lte=1), name='priority_range')
         ]
 
     def __str__(self):
@@ -134,7 +141,7 @@ class Task(models.Model):
 
     def assign(self, collaborator):
         if self.status == self.CREATED:
-            self.collaborator = collaborator
+            self.collaborators.add(collaborator)
             self.status = self.ASSIGNED
             self.save()
 
@@ -177,3 +184,44 @@ class Task(models.Model):
             self.status = self.TERMINATED
             self.end_date = datetime.now()
             self.save()
+
+    def is_deletable(self):
+        return self.collaborators.count() == 0
+    
+class TaskRole(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['task', 'role'], name='unique_task_role'),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.role.project == self.task.project:
+            super().save(*args, **kwargs)
+        else:
+            raise IntegrityError('roles_task')
+    
+class Assignation(models.Model):
+
+    ASSIGNED = '='
+    REVOKED = 'X'
+    FINISHED = 'O'
+
+    STATUS = [
+        (ASSIGNED, 'assigned'),
+        (REVOKED, 'revoked'),
+        (FINISHED, 'finished')
+    ]
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
+    status = models.CharField(max_length=1, choices=STATUS, default=ASSIGNED)
+    assignation_date = models.DateTimeField(auto_now_add=True)
+    dismissing_date = models.DateTimeField(null=True, default=None)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['task', 'collaborator'], name='unique_assignation')
+        ]

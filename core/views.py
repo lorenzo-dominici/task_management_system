@@ -14,11 +14,11 @@ class ProjectListView(ListView):
         projects = Project.objects.filter(visibility = Project.PUBLIC)
         if self.request.user.is_authenticated:
             projects = projects.union(Project.objects.filter(owner = self.request.user))
-            projects = projects.union(Project.objects.filter(collaborators__in = [self.request.user]).distinct())
+            projects = projects.union(Project.objects.filter(roles__collaborators__in = [self.request.user]).distinct())
         return projects
 
 class ProjectDetailView(DetailView):
-    template_name = 'core/project-detail.html'
+    template_name = 'core/project-details.html'
     context_object_name = 'project'
 
     def get_queryset(self):
@@ -40,22 +40,25 @@ class TaskListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         tasks = Task.objects.filter(project__in = Project.objects.filter(owner = self.request.user))
-        tasks = tasks.union(Task.objects.filter(collaborator__in = [self.request.user]).distinct())
-        tasks = tasks.union(Task.objects.filter(project__in = Project.object.filter(collaborators__in = [self.request.user]).distinct()))
+        tasks = tasks.union(Task.objects.filter(roles__collaborators__in = [self.request.user]).distinct())
+        tasks = tasks.union(Task.objects.filter(project__in = Project.objects.filter(roles__collaborators__in = [self.request.user]).distinct()))
 
 class TaskDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'core/task-detail.html'
+    template_name = 'core/task-details.html'
     context_object_name = 'task'
 
     def get_queryset(self):
         try:
             task = Task.objects.get(name = self.kwargs['task_name'], project = Project.objects.get(name = self.kwargs['project_name'], owner = self.kwargs['username']))
             owned = task.filter(project__name = self.request.user)
-            assigned = task.filter(collaborator = self.request.user)
+            assigned = task.filter(collaborators__in = self.request.user)
             available = task.filter(visibility = Task.PUBLIC, roles__collaborators__in = [self.request.user]).distinct()
             task = task.union(owned).union(assigned).union(available)
-            if task.count() == 0:
+            if task.count() != 1:
                 raise PermissionDenied
+            else:
+                task = task.get()
         except Task.DoesNotExist:
             return Task.objects.none()
         return task
+    

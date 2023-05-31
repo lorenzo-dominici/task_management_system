@@ -170,18 +170,32 @@ form > div > input:not(input[type="submit"]) {
     color: var(--text-3);
 }
 
-.top > ul {
+.top > .head {
     flex-basis: 60%;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--text-1);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
     overflow-x: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 
-.top > ul::-webkit-scrollbar {
+.top > .head > a {
+    color: var(--highlight);
+}
+
+.top > .head > a:hover {
+    text-decoration: underline;
+}
+
+.top > .head::-webkit-scrollbar {
     display: none;
 }
 
@@ -197,17 +211,36 @@ form > div > input:not(input[type="submit"]) {
     background-color: var(--bg);
 }
 
-.top > ul > li, .right > ul > li, .left > ul > li {
-    list-style: none;
-    text-align: center;
+.left > ul, .right > ul {
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-.top > ul > li > a, .right > ul > li > a, .left > ul > li > a{
+.left > ul::-webkit-scrollbar, .right > ul::-webkit-scrollbar {
+    display: none;
+}
+
+.right > ul > li, .left > ul > li {
+    list-style: none;
+}
+
+.left > ul > li {
+    display: block;
+}
+
+.left > ul > li > a{
+    display: block;
+    text-align: center;
     text-decoration: none;
-    padding: 1rem 1rem;
+    padding: 1rem;
     font-size: 1rem;
     font-weight: bold;
     color: var(--text-1);
+}
+
+.left > ul > li > a:hover {
+    color: var(--text-3);
 }
 
 main {

@@ -6,7 +6,8 @@ models = [
     Role,
     Collaboration,
     Task,
-
+    TaskRole,
+    Assignation
 ]
 
 admin.site.register(models)
