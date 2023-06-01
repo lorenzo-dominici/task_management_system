@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}{% if object %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block create_title %}{% endblock create_title %}{% endif %}{% endblock %}
+{% block title %}{% if object %}Edit {% block edit_title %}{% endblock edit_title %}{% else %}Create {% block create_title %}{% endblock create_title %}{% endif %}{% endblock title %}
 
-{% block top %}{% if object %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block top %}{% endblock create_top %}{% endif %}{% endblock %}
+{% block top %}{% if object %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block create_top %}{% endblock create_top %}{% endif %}{% endblock top %}
 
 {% block content %}
   <form method="post">

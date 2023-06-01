@@ -53,16 +53,18 @@ input:not(input[type="submit"]):focus {
     border-color: var(--highlight);
 }
 
-button, input[type="submit"] {
+.btn, input[type="submit"] {
+    display: inline-block;
     background-color: var(--button);
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 1rem;
     font-weight: bold;
+    text-decoration: none;
     padding: .5em 1em;
 }
 
-button:hover, input[type="submit"]:hover {
+.btn:hover, input[type="submit"]:hover {
     background-color: var(--border);
     border-color: var(--border-hover);
 }
@@ -212,6 +214,7 @@ form > div > input:not(input[type="submit"]) {
 }
 
 .left > ul, .right > ul {
+    height: 100%;
     overflow-y: scroll;
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -225,11 +228,11 @@ form > div > input:not(input[type="submit"]) {
     list-style: none;
 }
 
-.left > ul > li {
+.left > ul > li, .right > ul > li {
     display: block;
 }
 
-.left > ul > li > a{
+.left > ul > li > a, .right > ul > li > a {
     display: block;
     text-align: center;
     text-decoration: none;
@@ -239,7 +242,7 @@ form > div > input:not(input[type="submit"]) {
     color: var(--text-1);
 }
 
-.left > ul > li > a:hover {
+.left > ul > li > a:hover, .right > ul > li > a:hover {
     color: var(--text-3);
 }
 
