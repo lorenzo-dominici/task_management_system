@@ -7,7 +7,14 @@
 {% block content %}
   <ul>
   {% for role in roles %}
-    <li><a href="{% url 'core:role-details' role.project.owner.username role.project.name role.name %}">{{ role.name }}@{{ role.project.owner }}/{{ role.project.name }}</a></li>
+    <li>
+      <a href="{% url 'core:role-details' role.project.owner.username role.project.name role.name %}">{{ role.name }}@{{ role.project.owner }}/{{ role.project.name }}</a>
+      {% if role.project.owner == request.user %}
+        <a href="{% url 'core:role-edit' role.project.owner.username role.project.name role.name %}">Edit</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No roles</li>
   {% endfor %}
   </ul>
 {% endblock content %}

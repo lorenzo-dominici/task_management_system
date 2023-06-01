@@ -8,6 +8,6 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_div }}
-    <input class = "success" type = "submit" value ="{% if object %}Save{% else %}Create{% endif %}">
+    <input class = "success" type = "submit" value ="{% if project or role or task %}Save{% else %}Create{% endif %}">
   </form>
 {% endblock %}

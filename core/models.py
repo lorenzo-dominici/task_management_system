@@ -1,5 +1,6 @@
 import datetime
 from django.db import IntegrityError, models
+from django.contrib.auth import get_user_model
 from django.conf import settings
 
 class Project(models.Model):
@@ -53,10 +54,10 @@ class Project(models.Model):
 
     def is_deletable(self):
         return Collaboration.objects.filter(role__project = self).count() == 0
-
+    
     @property
     def collaborators(self):
-        return self.roles.collaborators.distinct()
+        return get_user_model().objects.filter(roles__project = self).all()
 
 class Role(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='roles')
@@ -97,14 +98,12 @@ class Task(models.Model):
     CREATED = '_'
     ASSIGNED = '='
     STARTED = '>'
-    SUSPENDED = '|'
     TO_APPROVE = '?'
     TERMINATED = 'X'
     STATUS = [
         (CREATED, 'created'),
         (ASSIGNED, 'assigned'),
         (STARTED, 'started'),
-        (SUSPENDED, 'suspended'),
         (TO_APPROVE, 'to approve'),
         (TERMINATED, 'terminated')
     ]

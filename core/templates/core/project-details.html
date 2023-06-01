@@ -2,25 +2,32 @@
 
 {% block title %}{{project.owner}}/{{project.name}}{% endblock title%}
 
-{% block top %}<a href="{% url 'core:user-details' project.owner.username' %}">{{project.owner}}</a>/<a href="{% url 'core:project-details' project.name %}">{{project.name}}{% endblock top %}
+{% block top %}<a href="{% url 'core:user-details' project.owner.username %}">{{project.owner}}</a>/<a href="{% url 'core:project-details' project.owner.username project.name %}">{{project.name}}</a>{% endblock top %}
 
 {% block content %}
   <p>{{ project.description }}</p>
-  <p>Status: {{ project.get_status_display }}</p>
-  <p>Created: {{ project.creation_date }}</p>
+  <p><span>Status:</span> {{ project.get_status_display }}</p>
+  <p><span>Created:</span> {{ project.creation_date }}</p>
   {% if project.closing_date %}
-    <p>Closing: {{ project.closing_date }}</p>
+    <p><span>Closing:</span> {{ project.closing_date }}</p>
   {% endif %}
-  <h2>Roles:</h2>
+  <div class = "section">Roles:</div>
   <ul>
   {% for role in project.roles.all %}
-    <li>{{ role.name }}</li>
+    <li>
+      <a href="{% url 'core:role-details' project.owner.username project.name role.name %}">{{ role.name }}</a>
+      {% if role.project.owner == request.user %}
+        <a href="{% url 'core:role-edit' project.owner.username project.name role.name %}">Edit</a>
+      {% endif %}
+    </li>
   {% endfor %}
   </ul>
-  <h2>Collaborators:</h2>
+  <div class = "section">Collaborators:</div>
   <ul>
   {% for collaborator in project.collaborators %}
-    <li>{{ collaborator.username }}</li>
+    <li><a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a></li>
+  {% empty %}
+    <li>No collaborators</li>
   {% endfor %}
   </ul>
 {% endblock content %}
@@ -31,5 +38,7 @@
   <li><a href="{% url 'core:role-new' project.owner.username project.name %}">Create Role</a></li>
   <li><a href="{% url 'core:task-new' project.owner.username project.name %}">Create Task</a></li>
   {% endif %}
+  {% if request.user.is_authenticated %}
   <li><a href="{% url 'core:project-new' %}">Create Project</a></li>
+  {% endif %}
 {% endblock right %}

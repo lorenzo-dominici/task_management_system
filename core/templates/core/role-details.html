@@ -7,20 +7,19 @@
 {% block content %}
   <p>{{ role.description }}</p>
 
-  <h2>Collaborators</h2>
+  <div class = "section">Collaborators</div>
   <ul>
     {% for collaborator in role.collaborators.all %}
-      <li>{{ collaborator.username }}</li>
+      <li><a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a></li>
     {% empty %}
       <li>No collaborators</li>
     {% endfor %}
   </ul>
-
-  {% block right %}
-    {% if request.user == role.project.owner %}
-    <li><a href="{% url 'core:role-edit' role.project.owner.username role.project.name role.name %}">Edit Role</a></li>
-    <li><a href="{% url 'core:role-new' role.project.owner.username role.project.name %}">Create Role</a></li>
-    {% endif %}
-  {% endblock right %}
-
 {% endblock %}
+  
+{% block right %}
+  {% if request.user == role.project.owner %}
+  <li><a href="{% url 'core:role-edit' role.project.owner.username role.project.name role.name %}">Edit Role</a></li>
+  <li><a href="{% url 'core:role-new' role.project.owner.username role.project.name %}">Create Role</a></li>
+  {% endif %}
+{% endblock right %}

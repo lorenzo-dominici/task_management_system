@@ -17,6 +17,12 @@ urlpatterns = [
     path('<str:username>/<str:project_name>/edit/', edit_project, name='project-edit'),
     path('<str:username>/<str:project_name>/roles/<str:role_name>/edit/', edit_role, name='role-edit'),
     path('<str:username>/<str:project_name>/tasks/<str:task_name>/edit/', edit_task, name='task-edit'),
+    path('<str:username>/<str:project_name>/<str:task_name>/join', join_task, name='task-join'),
+    path('<str:username>/<str:project_name>/<str:task_name>/leave', leave_task, name='task-leave'),
+    path('<str:username>/<str:project_name>/<str:task_name>/start', start_task, name='task-start'),
+    path('<str:username>/<str:project_name>/<str:task_name>/end', end_task, name='task-end'),
+    path('<str:username>/<str:project_name>/<str:task_name>/approve', approve_task, name='task-approve'),
+    path('<str:username>/<str:project_name>/<str:task_name>/reject', reject_task, name='task-reject'),
 
     path('<str:username>/', view_user, name='user-details'),
     path('<str:username>/<str:project_name>/', view_project, name='project-details'),

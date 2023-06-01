@@ -39,20 +39,6 @@ body {
     grid-template-areas: 'top top top' 'left main right';
 }
 
-input:not(input[type="submit"]) {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background-color: var(--bg);
-    outline: none;
-    color: var(--text-1);
-    padding: .5em 1em;
-}
-
-input:not(input[type="submit"]):focus {
-    outline: none;
-    border-color: var(--highlight);
-}
-
 .btn, input[type="submit"] {
     display: inline-block;
     background-color: var(--button);
@@ -67,36 +53,6 @@ input:not(input[type="submit"]):focus {
 .btn:hover, input[type="submit"]:hover {
     background-color: var(--border);
     border-color: var(--border-hover);
-}
-
-
-form > div {
-    font-size: 0;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-areas: 'label input';
-}
-
-form > div > label {
-    display: block;
-    grid-area: label;
-    background-color: var(--button);
-    border: 1px solid var(--border);
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-    padding: .5em 1em;
-    text-align: center;
-    color: var(--text-1);
-    font-size: 1rem;
-}
-
-form > div > input:not(input[type="submit"]) {
-    display: block;
-    grid-area: input;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    font-size: 1rem;
-    height: 100%;
 }
 
 .success {
@@ -130,14 +86,6 @@ form > div > input:not(input[type="submit"]) {
     display: none;
 }
 
-.top > .user {
-    flex-basis: 20%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-}
-
 .top > .logo > a {
     height: 100%;
     text-decoration: none;
@@ -159,8 +107,17 @@ form > div > input:not(input[type="submit"]) {
     margin-left: .5rem;
 }
 
+.top > .user {
+    flex-basis: 20%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
 .top > .user > a {
     display: block;
+    text-align: center;
     text-decoration: none;
     font-size: 1rem;
     padding: 1rem 2rem;
@@ -178,8 +135,7 @@ form > div > input:not(input[type="submit"]) {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    text-decoration: none;
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: bold;
     color: var(--text-1);
     padding-left: 1.5rem;
@@ -190,7 +146,10 @@ form > div > input:not(input[type="submit"]) {
 }
 
 .top > .head > a {
+    text-decoration: none;
     color: var(--highlight);
+    padding-left: 0.1em;
+    padding-right: 0.1em;
 }
 
 .top > .head > a:hover {
@@ -224,7 +183,7 @@ form > div > input:not(input[type="submit"]) {
     display: none;
 }
 
-.right > ul > li, .left > ul > li {
+ul > li {
     list-style: none;
 }
 
@@ -244,6 +203,14 @@ form > div > input:not(input[type="submit"]) {
 
 .left > ul > li > a:hover, .right > ul > li > a:hover {
     color: var(--text-3);
+}
+
+.left > ul > li > span, .right > ul > li > span {
+    display: block;
+    margin: 0 1rem;
+    border: .5px solid var(--border);
+    font-size: 0;
+    overflow: hidden;
 }
 
 main {
@@ -267,13 +234,54 @@ main > div.title {
 }
 
 main > form {
-    width: 60%;
+    width: 80%;
     margin: 2rem auto;
 }
 
 main > form > div {
+    font-size: 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas: 'label input';
     width: 100%;
     margin-bottom: 2rem;
+}
+
+main > form > div > label {
+    display: block;
+    grid-area: label;
+    background-color: var(--button);
+    border: 1px solid var(--border);
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    padding: .5em 1em;
+    text-align: center;
+    color: var(--text-1);
+    font-size: 1rem;
+}
+
+main > form > div > :not(label) {
+    display: block;
+    grid-area: input;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    font-size: 1rem;
+    height: 100%;
+    width: 100%;
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    outline: none;
+    color: var(--text-1);
+    padding: .5em 1em;
+}
+
+textarea {
+    resize: none;
+}
+
+main > form > div > :not(label):focus {
+    outline: none;
+    border-color: var(--highlight);
 }
 
 main > form > input[type="submit"] {
@@ -293,6 +301,52 @@ main > form ~ div > a:hover {
 }
 
 main > p {
-    text-align: center;
+    text-align: justify;
     color: var(--text-2);
+    margin: 1rem 0;
+}
+
+main > p > span {
+    font-weight: bold;
+    color: var(--text-1)
+}
+
+main > .section {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
+main > ul > li{
+    border: 1px solid var(--border);
+    border-bottom: none;
+    padding: .75em 1.5em;
+}
+
+main > ul > li > a:first-child {
+    color: var(--text-1);
+    text-decoration: none;
+}
+
+main ul > li a:not(:first-child) {
+    color: var(--highlight);
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 1rem;
+    float: right;
+}
+
+main > ul > li > a:hover {
+    text-decoration: underline;
+}
+
+main > ul > li:first-child {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+main > ul > li:last-child {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom: 1px solid var(--border);
 }

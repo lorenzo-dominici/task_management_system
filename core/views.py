@@ -1,10 +1,10 @@
-from django.conf import settings
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from .models import Project, Task, Role
+from .models import Assignation, Project, Task, Role
 from .forms import ProjectForm, RoleForm, TaskForm
 
 #TODO: implement pagination
@@ -59,7 +59,13 @@ def view_task(request, task_name, username, project_name):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
     if not (request.user in task.project.collaborators and task.visibility == Task.PUBLIC) and request.user != task.project.owner:
         raise PermissionDenied
-    render(request, 'core/task-details.html', {'task': task})
+    collaborators = task.collaborators.filter(assignation__dismissing_date__isnull = True)
+    competence = False
+    roles = task.roles.all()
+    for role in request.user.roles.filter(project = task.project):
+        if role in roles:
+            competence = True
+    return render(request, 'core/task-details.html', {'task': task, 'collaborators': collaborators, 'competence': competence})
 
 @login_required
 def edit_project(request, username = None, project_name = None):
@@ -69,11 +75,13 @@ def edit_project(request, username = None, project_name = None):
     form = ProjectForm(request.POST or None, instance = project)
     if project:
         form.fields.pop('name', None)
+    else:
+        form.fields.pop('status', None)
     if request.method == 'POST' and form.is_valid():
         project = form.save(commit=False)
         project.owner = request.user
         project.save()
-        return redirect('core:project-details', username = username, project_name = project_name)
+        return redirect('core:project-details', username = project.owner.username, project_name = project.name)
     return render(request, 'core/project-edit.html', {'form': form})
 
 @login_required
@@ -89,7 +97,7 @@ def edit_role(request, username = None, project_name = None, role_name = None):
         role = form.save(commit=False)
         role.project = project
         role.save()
-        return redirect('core:role-details', username = username, project_name = project_name)
+        return redirect('core:role-details', username = role.project.owner.username, project_name = role.project.name, role_name = role.name)
     return render(request, 'core/role-edit.html', {'form': form})
 
 @login_required
@@ -105,6 +113,67 @@ def edit_task(request, username = None, project_name = None, task_name = None):
         task = form.save(commit=False)
         task.project = project
         task.save()
-        task.save_m2m()
-        return redirect('core:project-details', username = username, project_name = project_name)
-    return render(request, 'core/project-edit.html', {'form': form})
+        if form.cleaned_data['roles']:
+            task.roles.add(form.cleaned_data['roles'].get().id)
+        return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+    return render(request, 'core/task-edit.html', {'form': form})
+
+@login_required
+def join_task(request, username, project_name, task_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if request.user not in task.project.collaborators or task.collaborators.filter(username = request.user.username).exists():
+        raise PermissionDenied
+    task.collaborators.add(request.user)
+    if task.status == Task.CREATED:
+        task.status = Task.ASSIGNED
+        task.save()
+    return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+
+@login_required
+def leave_task(request, username, project_name, task_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if request.user in task.collaborators.distinct():
+        assignation = get_object_or_404(Assignation, task = task, collaborator = request.user)
+        assignation.dismissing_date = timezone.now()
+        assignation.save()
+    return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+
+@login_required
+def start_task(request, username, project_name, task_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if request.user not in task.collaborators.all() or task.status != Task.ASSIGNED:
+        raise PermissionDenied
+    task.status = Task.STARTED
+    task.start_date = timezone.now()
+    task.save()
+    return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+
+@login_required
+def end_task(request, username, project_name, task_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if request.user not in task.collaborators.all() or task.status != Task.STARTED:
+        raise PermissionDenied
+    task.status = Task.TO_APPROVE
+    task.request_date = timezone.now()
+    task.save()
+    return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+
+@login_required
+def approve_task(request, username, project_name, task_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if request.user != task.project.owner:
+        raise PermissionDenied
+    task.status = Task.TERMINATED
+    task.end_date = timezone.now()
+    task.save()
+    return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+
+@login_required
+def reject_task(request, username, project_name, task_name):
+    task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
+    if request.user != task.project.owner:
+        raise PermissionDenied
+    task.status = Task.STARTED
+    task.request_date = None
+    task.save()
+    return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)

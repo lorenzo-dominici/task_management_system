@@ -7,7 +7,18 @@
 {% block content %}
   <ul>
   {% for task in tasks %}
-    <li><a href="{% url 'core:task-details' task.project.owner.username task.project.name task.name %}">{{ task.name }}@{{ task.project.owner }}/{{ task.project.name }}</a></li>
+    <li>
+      <a href="{% url 'core:task-details' task.project.owner.username task.project.name task.name %}">{{ task.name }}@{{ task.project.owner }}/{{ task.project.name }}</a>
+      {% if task not in user.tasks.all and request.user in task.project.collaborators %}
+        <a href="{% url 'core:task-join' task.project.owner.username task.project.name task.name %}">Join</a>
+      {% else %}
+        {% if task.project.owner == request.user %}
+          <a href="{% url 'core:task-edit' task.project.owner.username task.project.name task.name %}">Edit</a>
+        {% endif %}
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No tasks</li>
   {% endfor %}
   </ul>
 {% endblock content %}

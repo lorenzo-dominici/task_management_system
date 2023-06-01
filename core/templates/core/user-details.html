@@ -7,18 +7,24 @@
 {% block content %}
   <p>Email: {{ user.email }}</p>
 
-  <h2>Collaborations</h2>
+  {% if request.user != user %}
+  <div class = "section">Collaborations</div>
   <ul>
     {% for role in user.roles.all %}
-      <li>{{ role.name }} - {{ role.project.name }}</li>
+      <li>
+        <a href="{% url 'core:role-details' role.project.owner.username role.project.name role.name %}">{{ role.name }}</a>@<a href="{% url 'core:user-details' role.project.owner.username %}">{{ role.project.owner }}</a>/<a href="{% url 'core:project-details' role.project.owner.username role.project.name %}">{{ role.project.name }}</a></li>
     {% empty %}
       <li>No roles</li>
     {% endfor %}
   </ul>
+  {% endif %}
 {% endblock %}
 
 {% block right %}
   {% if user == request.user %}
+  <li><a href="{% url 'password_change' %}">Change Password</a></li>
+  <li><a href="{% url 'logout' %}">Logout</a></li>
+  <li><span></span></li>
   <li><a href="{% url 'core:project-new' %}">Create Project</a></li>
   {% endif %}
 {% endblock right %}
