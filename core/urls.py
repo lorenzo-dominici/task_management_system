@@ -9,12 +9,19 @@ urlpatterns = [
     path('projects/', list_projects, name='projects-list'),
     path('roles/', list_roles, name='roles-list'),
     path('tasks/', list_tasks, name='tasks-list'),
+    path('requests/', list_requests, name='requests-list'),
+
+    path('requests/<int:request_id>/', view_request, name='request-details'),
+    path('requests/<int:request_id>/accept', accept_request, name='request-accept'),
+    path('requests/<int:request_id>/reject', reject_request, name='request-reject'),
+    path('requests/<int:request_id>/revoke', revoke_request, name='request-revoke'),
 
     path('projects/new/', edit_project, name='project-new'),
     path('<str:username>/<str:project_name>/new-role/', edit_role, name='role-new'),
     path('<str:username>/<str:project_name>/new-task/', edit_task, name='task-new'),
 
     path('<str:username>/<str:project_name>/edit/', edit_project, name='project-edit'),
+    path('<str:username>/<str:project_name>/roles/<str:role_name>/request/', edit_request, name='request-new'),
     path('<str:username>/<str:project_name>/roles/<str:role_name>/edit/', edit_role, name='role-edit'),
     path('<str:username>/<str:project_name>/tasks/<str:task_name>/edit/', edit_task, name='task-edit'),
     path('<str:username>/<str:project_name>/<str:task_name>/join', join_task, name='task-join'),

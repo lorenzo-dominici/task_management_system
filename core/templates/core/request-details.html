@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Join Request @ {{ join_request.role.project.owner.username }}/{{ join_request.role.project.name }}{% endblock title %}
+
+{% block top %}Join Request @ <a href="{% url 'core:user-details' join_request.role.project.owner.username %}">{{ join_request.role.project.owner }}</a>/<a href="{% url 'core:project-details' join_request.role.project.owner.username join_request.role.project.name %}">{{ join_request.role.project.name }}</a>{% endblock top %}
+
+{% block content %}
+  {% if request.user == join_request.sender %}
+  <p><span>To:</span> <a href="{% url 'core:user-details' join_request.receiver.username %}">{{ join_request.receiver.username }}</a></p>
+  {% endif %}
+  <p>{{ join_request.description }}</p>
+{% endblock content %}
+
+{% block right %}
+{% if request.user == join_request.receiver %}
+<li><a class = "action scs" href="{% url 'core:request-accept' join_request.id %}">Accept</a></li>
+<li><a class = "action dng" href="{% url 'core:request-reject' join_request.id %}">Reject</a></li>
+{% else %}
+<li><a class = "action dng" href="{% url 'core:request-revoke' join_request.id %}">Revoke</a></li>
+{% endif %}
+{% endblock right %}

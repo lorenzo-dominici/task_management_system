@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from .models import Assignation, Project, Task, Role
-from .forms import ProjectForm, RoleForm, TaskForm
+from .models import *
+from .forms import *
 
 #TODO: implement pagination
 #TODO: implement search/filters
@@ -33,6 +33,12 @@ def list_tasks(request):
     tasks = tasks.union(Task.objects.filter(roles__collaborators__in = [request.user]).distinct())
     tasks = tasks.union(Task.objects.filter(project__in = Project.objects.filter(roles__collaborators__in = [request.user]).distinct()))
     return render(request, 'core/tasks-list.html', {'tasks': tasks})
+
+@login_required
+def list_requests(request):
+    join_requests = JoinRequest.objects.filter(status = JoinRequest.PENDING, sender = request.user)
+    join_requests = join_requests.union(JoinRequest.objects.filter(status = JoinRequest.PENDING, receiver = request.user))
+    return render(request, 'core/requests-list.html', {'join_requests': join_requests})
 
 def view_user(request, username):
     user = get_object_or_404(get_user_model(), username = username)
@@ -65,6 +71,13 @@ def view_task(request, task_name, username, project_name):
     return render(request, 'core/task-details.html', {'task': task, 'collaborators': collaborators, 'competence': competence, 'competent_collaborators': competent_collaborators})
 
 @login_required
+def view_request(request, request_id):
+    join_request = get_object_or_404(JoinRequest, id = request_id)
+    if join_request.status != JoinRequest.PENDING or (request.user != join_request.sender and request.user != join_request.receiver):
+        raise PermissionDenied
+    return render(request, 'core/request-details.html', {'join_request': join_request})
+
+@login_required
 def edit_project(request, username = None, project_name = None):
     if username and request.user.username != username:
         raise PermissionDenied
@@ -79,7 +92,7 @@ def edit_project(request, username = None, project_name = None):
         project.owner = request.user
         project.save()
         return redirect('core:project-details', username = project.owner.username, project_name = project.name)
-    return render(request, 'core/project-edit.html', {'form': form})
+    return render(request, 'core/project-edit.html', {'form': form, 'edit': project is not None})
 
 @login_required
 def edit_role(request, username = None, project_name = None, role_name = None):
@@ -95,7 +108,7 @@ def edit_role(request, username = None, project_name = None, role_name = None):
         role.project = project
         role.save()
         return redirect('core:role-details', username = role.project.owner.username, project_name = role.project.name, role_name = role.name)
-    return render(request, 'core/role-edit.html', {'form': form})
+    return render(request, 'core/role-edit.html', {'form': form, 'edit': role is not None})
 
 @login_required
 def edit_task(request, username = None, project_name = None, task_name = None):
@@ -113,7 +126,34 @@ def edit_task(request, username = None, project_name = None, task_name = None):
         if form.cleaned_data['roles']:
             task.roles.add(form.cleaned_data['roles'].get().id)
         return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
-    return render(request, 'core/task-edit.html', {'form': form})
+    return render(request, 'core/task-edit.html', {'form': form, 'edit': task is not None})
+
+@login_required
+def edit_request(request, username, project_name, role_name):
+    role = get_object_or_404(Role, name = role_name, project__name = project_name, project__owner__username = username)
+    form = JoinRequestForm(request.POST or None, role = role)
+    if request.user == role.project.owner:
+        if request.method == 'POST' and form.is_valid():
+            join_request = form.save(commit=False)
+            join_request.sender = request.user
+            join_request.role = role
+            join_request.save()
+            return redirect('core:request-details', request_id = join_request.id)
+        return render(request, 'core/request-edit.html', {'form': form, 'edit': False})
+    else:
+        form.fields.pop('receiver', None)
+        if role.project.visibility == Project.PUBLIC:
+            if request.method == 'POST' and form.is_valid():
+                join_request = form.save(commit=False)
+                join_request.sender = request.user
+                join_request.receiver = role.project.owner
+                join_request.role = role
+                join_request.save()
+                return redirect('core:request-details', request_id = join_request.id)
+        return render(request, 'core/request-edit.html', {'form': form, 'edit': False})
+        raise PermissionDenied
+
+
 
 @login_required
 def join_task(request, username, project_name, task_name):
@@ -200,3 +240,33 @@ def reject_task(request, username, project_name, task_name):
     task.request_date = None
     task.save()
     return redirect('core:task-details', username = task.project.owner.username, project_name = task.project.name, task_name = task.name)
+
+@login_required
+def accept_request(request, request_id):
+    join_request = get_object_or_404(JoinRequest, id = request_id)
+    if join_request.status != JoinRequest.PENDING or request.user != join_request.receiver:
+        raise PermissionDenied
+    if request.user == join_request.role.project.owner:
+        join_request.role.collaborators.add(join_request.sender)
+    else:
+        join_request.role.collaborators.add(join_request.receiver)
+    join_request.status = JoinRequest.ACCEPTED
+    join_request.save()
+    return redirect('core:project-details', username = join_request.role.project.owner.username, project_name = join_request.role.project.name)
+
+@login_required
+def reject_request(request, request_id):
+    join_request = get_object_or_404(JoinRequest, id = request_id)
+    if join_request.state != JoinRequest.PENDING or request.user != join_request.receiver:
+        raise PermissionDenied
+    join_request.status = JoinRequest.REJECTED
+    join_request.save()
+    return redirect('core:project-details', username = join_request.role.project.owner.username, project_name = join_request.role.project.name)
+
+@login_required
+def revoke_request(request, request_id):
+    join_request = get_object_or_404(JoinRequest, id = request_id)
+    if join_request.status != JoinRequest.PENDING or request.user != join_request.sender:
+        raise PermissionDenied
+    join_request.delete()
+    return redirect('core:project-details', username = join_request.role.project.owner.username, project_name = join_request.role.project.name)

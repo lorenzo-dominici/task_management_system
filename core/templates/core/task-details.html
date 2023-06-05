@@ -19,7 +19,7 @@
       <li>
         <a href="{% url 'core:role-details' task.project.owner.username task.project.name role.name %}">{{ role.name }}</a>
         {% if role.project.owner == request.user %}
-          <a href="{% url 'core:role-edit' task.project.owner.username task.project.name role.name %}">Edit</a>
+          <a class = "action" href="{% url 'core:role-edit' task.project.owner.username task.project.name role.name %}">Edit</a>
         {% endif %}
       </li>
     {% empty %}

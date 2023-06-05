@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Join Requests{% endblock title %}
+
+{% block top %}Join Requests{% endblock top %}
+
+{% block content %}
+  <ul>
+  {% for join_request in join_requests %}
+    <li>
+      <a href="{% url 'core:role-details' join_request.role.project.owner.username join_request.role.project.name join_request.role.name %}">{{ join_request.role.name }}</a>@<a href="{% url 'core:request-details' join_request.id %}">{{ join_request.role.project.owner }}/{{ join_request.role.project.name }}</a>
+      {% if request.user == join_request.receiver %}
+        <a class = "action dng" href="{% url 'core:request-reject' join_request.id %}">Reject</a>
+        <a class = "action scs" href="{% url 'core:request-accept' join_request.id %}">Accept</a>
+      {% else %}
+        <a class = "action dng" href="{% url 'core:request-revoke' join_request.id %}">Revoke</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No join requests</li>
+  {% endfor %}
+  </ul>
+{% endblock content %}
+

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{% if object %}Edit {% block edit_title %}{% endblock edit_title %}{% else %}Create {% block create_title %}{% endblock create_title %}{% endif %}{% endblock title %}
+{% block title %}{% if edit %}Edit {% block edit_title %}{% endblock edit_title %}{% else %}Create {% block create_title %}{% endblock create_title %}{% endif %}{% endblock title %}
 
-{% block top %}{% if object %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block create_top %}{% endblock create_top %}{% endif %}{% endblock top %}
+{% block top %}{% if edit %}Edit {% block edit_top %}{% endblock edit_top %}{% else %}Create {% block create_top %}{% endblock create_top %}{% endif %}{% endblock top %}
 
 {% block content %}
   <form method="post">
     {% csrf_token %}
     {{ form.as_div }}
-    <input class = "success" type = "submit" value ="{% if project or role or task %}Save{% else %}Create{% endif %}">
+    <input class = "success" type = "submit" value ="{% if edit %}Save{% else %}Create{% endif %}">
   </form>
 {% endblock %}

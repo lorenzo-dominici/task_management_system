@@ -7,7 +7,8 @@ models = [
     Collaboration,
     Task,
     TaskRole,
-    Assignation
+    Assignation,
+    JoinRequest
 ]
 
 admin.site.register(models)

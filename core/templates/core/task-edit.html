@@ -1,7 +1,7 @@
 {% extends "core/edit.html" %}
 
-{% block edit_title %}{{ object.name }}@{{ object.project.owner.username }}/{{ object.project.name }}{% endblock edit_title %}
+{% block edit_title %}Task{% endblock edit_title %}
 {% block create_title %}Task{% endblock create_title %}
 
-{% block edit_top %}<a href="{% url 'core:task-details' object.project.owner.username object.project.name object.name %}">{{ object.name }}</a>@<a href="{% url 'core:user-details' object.project.owner.username %}">{{ object.owner.username }}</a>/<a href="{% url 'core:project-details' objectproject.owner.username object.project.name %}">{{ object.name }}</a>{% endblock edit_top %}
+{% block edit_top %}Task{% endblock edit_top %}
 {% block create_top %}Task{% endblock create_top %}

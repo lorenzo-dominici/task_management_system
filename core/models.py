@@ -161,3 +161,33 @@ class Assignation(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['task', 'collaborator'], name='unique_assignation')
         ]
+
+class JoinRequest(models.Model):
+
+    ACCEPTED = '+'
+    REJECTED = '-'
+    PENDING = '?'
+    OUTCOME = [
+        (ACCEPTED, 'accepted'),
+        (REJECTED, 'rejected'),
+        (PENDING, 'pending')
+    ]
+
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name = 'requests_sent')
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, related_name = 'requests_received')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    description = models.TextField()
+    status = models.CharField(max_length=1, choices=OUTCOME, default=PENDING)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    closing_date = models.DateTimeField(null=True, default=None, blank = True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['sender', 'receiver', 'role'], name='unique_request')
+        ]
+
+    def save(self, *args, **kwargs):
+        if (self.sender == self.role.project.owner) != (self.receiver == self.role.project.owner):
+            super().save(*args, **kwargs)
+        else:
+            raise IntegrityError('requests')

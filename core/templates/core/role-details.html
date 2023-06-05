@@ -21,5 +21,11 @@
   {% if request.user == role.project.owner %}
   <li><a href="{% url 'core:role-edit' role.project.owner.username role.project.name role.name %}">Edit Role</a></li>
   <li><a href="{% url 'core:role-new' role.project.owner.username role.project.name %}">Create Role</a></li>
+  <li><span></span></li>
+  <li><a href="{% url 'core:request-new' role.project.owner.username role.project.name role.name %}">Invite</a></li>
+  {% else %}
+    {% if request.user.is_authenticated%}
+    <li><a href="{% url 'core:request-new' role.project.owner.username role.project.name role.name %}">Join</a></li>
+    {% endif %}
   {% endif %}
 {% endblock right %}

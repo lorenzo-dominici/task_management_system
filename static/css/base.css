@@ -65,6 +65,18 @@ body {
     border-color: var(--success-hover) !important;
 }
 
+.scs {
+    color: var(--success) !important;
+}
+
+.wrn {
+    color: var(--warning) !important;
+}
+
+.dng {
+    color: var(--danger) !important;
+}
+
 .top {
     grid-area: top;
     display: flex;
@@ -284,8 +296,8 @@ main > form > div > :not(label):focus {
     border-color: var(--highlight);
 }
 
-main > form > div > div.helptext {
-    display: none;
+.helptext, .errorlist {
+    display: none !important;
 }
 
 main > form > input[type="submit"] {
@@ -313,6 +325,15 @@ main > p {
 main > p > span {
     font-weight: bold;
     color: var(--text-1)
+}
+
+main > p > a {
+    color: var(--highlight);
+    text-decoration: none;
+}
+
+main > p > a:hover {
+    text-decoration: underline;
 }
 
 main > .section {
