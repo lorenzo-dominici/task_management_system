@@ -24,7 +24,7 @@ class Project(models.Model):
     visibility = models.CharField(max_length=1, choices=VISIBILITY, default=PRIVATE)
     status = models.CharField(max_length=1, choices=STATUS, default=OPEN)
     creation_date = models.DateTimeField(null=True, auto_now_add=True)
-    closing_date = models.DateTimeField(null=True, default=None)
+    closing_date = models.DateTimeField(null=True, default=None, blank = True)
 
     
     class Meta:
@@ -35,22 +35,6 @@ class Project(models.Model):
     
     def __str__(self):
         return self.name
-    
-    def publish(self):
-        self.visibility = self.PUBLIC
-        self.save()
-
-    def unpublish(self):
-        self.visibility = self.PRIVATE
-        self.save()
-
-    def open(self):
-        self.status = self.OPEN
-        self.save()
-
-    def close(self):
-        self.visibility = self.CLOSED
-        self.save()
 
     def is_deletable(self):
         return Collaboration.objects.filter(role__project = self).count() == 0
@@ -80,7 +64,7 @@ class Collaboration(models.Model):
     collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     joining_date = models.DateTimeField(auto_now_add=True)
-    dismissing_date = models.DateTimeField(null=True, default=None)
+    dismissing_date = models.DateTimeField(null=True, default=None, blank = True)
 
     class Meta:
         constraints = [
@@ -117,9 +101,9 @@ class Task(models.Model):
     roles = models.ManyToManyField(Role, related_name='tasks', through='TaskRole')
     collaborators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='tasks', through='Assignation')
     creation_date = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateTimeField(null=True, default=None)
-    request_date = models.DateTimeField(null=True, default=None)
-    end_date = models.DateTimeField(null=True, default=None)
+    start_date = models.DateTimeField(null=True, default=None, blank = True)
+    request_date = models.DateTimeField(null=True, default=None, blank = True)
+    end_date = models.DateTimeField(null=True, default=None, blank = True)
 
     class Meta:
         get_latest_by = ['creation_date', 'start_date']
@@ -130,63 +114,15 @@ class Task(models.Model):
 
     def __str__(self):
         return self.name
-    
-    def publish(self):
-        self.visibility = self.PUBLIC
-        self.save()
-
-    def unpublish(self):
-        self.visibility = self.PRIVATE
-        self.save()
-
-    def assign(self, collaborator):
-        if self.status == self.CREATED:
-            self.collaborators.add(collaborator)
-            self.status = self.ASSIGNED
-            self.save()
-
-    def start(self):
-        if self.status == self.ASSIGNED:
-            self.status = self.STARTED
-            self.start_date = datetime.now()
-            self.save()
-
-    def suspend(self):
-        if self.status != self.TERMINATED:
-            self.status = self.SUSPENDED
-            self.save()
-
-    def restore(self):
-        if self.status == self.SUSPENDED:
-            if self.collaborator is not None:
-                if self.start_date is not None:
-                    self.status = self.STARTED
-                else:
-                    self.status = self.ASSIGNED
-            else:
-                self.status = self.CREATED
-            self.save()
-
-    def request_approval(self):
-        if self.status == self.STARTED:
-            self.status = self.TO_APPROVE
-            self.request_date = datetime.now()
-            self.save()
-
-    def refuse_approval(self):
-        if self.status == self.TO_APPROVE:
-            self.status = self.STARTED
-            self.request_date = None
-            self.save()
-
-    def terminate(self):
-        if self.status == self.TO_APPROVE:
-            self.status = self.TERMINATED
-            self.end_date = datetime.now()
-            self.save()
 
     def is_deletable(self):
         return self.collaborators.count() == 0
+    
+    def is_competent(self, collaborator):
+        for role in collaborator.roles.filter(project = self.project):
+            if role in self.roles:
+                return True
+        return False
     
 class TaskRole(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -219,7 +155,7 @@ class Assignation(models.Model):
     collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
     status = models.CharField(max_length=1, choices=STATUS, default=ASSIGNED)
     assignation_date = models.DateTimeField(auto_now_add=True)
-    dismissing_date = models.DateTimeField(null=True, default=None)
+    dismissing_date = models.DateTimeField(null=True, default=None, blank = True)
 
     class Meta:
         constraints = [

@@ -31,9 +31,19 @@
     {% for collaborator in collaborators %}
       <li>
         <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
+        <a class = "action" href="{% url 'core:task-revoke' task.project.owner.username task.project.name task.name collaborator.username %}">Revoke</a>
       </li>
     {% empty %}
       <li>No collaborators</li>
+    {% endfor %}
+  </ul>
+  <div class = "section">Competent Project Collaborators:</div>
+  <ul>
+    {% for collaborator in competent_collaborators %}
+      <li>
+        <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
+        <a class = "action" href="{% url 'core:task-assign' task.project.owner.username task.project.name task.name collaborator.username %}">Assign</a>
+      </li>
     {% endfor %}
   </ul>
 {% endblock content %}

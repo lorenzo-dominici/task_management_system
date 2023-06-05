@@ -23,6 +23,9 @@ urlpatterns = [
     path('<str:username>/<str:project_name>/<str:task_name>/end', end_task, name='task-end'),
     path('<str:username>/<str:project_name>/<str:task_name>/approve', approve_task, name='task-approve'),
     path('<str:username>/<str:project_name>/<str:task_name>/reject', reject_task, name='task-reject'),
+    path('<str:username>/<str:project_name>/<str:task_name>/assign/<str:collaborator>', assign_task, name='task-assign'),
+    path('<str:username>/<str:project_name>/<str:task_name>/revoke/<str:collaborator>', revoke_task, name='task-revoke'),
+
 
     path('<str:username>/', view_user, name='user-details'),
     path('<str:username>/<str:project_name>/', view_project, name='project-details'),
