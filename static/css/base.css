@@ -284,6 +284,10 @@ main > form > div > :not(label):focus {
     border-color: var(--highlight);
 }
 
+main > form > div > div.helptext {
+    display: none;
+}
+
 main > form > input[type="submit"] {
     display: block;
     margin: 0 auto;
@@ -323,12 +327,12 @@ main > ul > li{
     padding: .75em 1.5em;
 }
 
-main > ul > li > a:first-child {
+main > ul > li > a {
     color: var(--text-1);
     text-decoration: none;
 }
 
-main ul > li a:not(:first-child) {
+main ul > li a.action {
     color: var(--highlight);
     text-decoration: none;
     font-weight: bold;

@@ -10,7 +10,7 @@
     <li>
       <a href="{% url 'core:project-details' project.owner.username project.name %}">{{ project.owner }}/{{ project.name }}</a>
       {% if project.owner == request.user %}
-        <a href="{% url 'core:project-edit' project.owner.username project.name %}">Edit</a>
+        <a class = "action" href="{% url 'core:project-edit' project.owner.username project.name %}">Edit</a>
       {% endif %}
     </li>
   {% empty %}

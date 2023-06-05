@@ -5,14 +5,14 @@
 {% block top %}{{ user.username }}{% endblock top %}
 
 {% block content %}
-  <p>Email: {{ user.email }}</p>
+  <p><span>Email:</span> {{ user.email }}</p>
 
   {% if request.user != user %}
   <div class = "section">Collaborations</div>
   <ul>
     {% for role in user.roles.all %}
       <li>
-        <a href="{% url 'core:role-details' role.project.owner.username role.project.name role.name %}">{{ role.name }}</a>@<a href="{% url 'core:user-details' role.project.owner.username %}">{{ role.project.owner }}</a>/<a href="{% url 'core:project-details' role.project.owner.username role.project.name %}">{{ role.project.name }}</a></li>
+        <a href="{% url 'core:role-details' role.project.owner.username role.project.name role.name %}">{{ role.name }}</a>@<a href="{% url 'core:user-details' role.project.owner.username %}">{{ role.project.owner.username }}</a>/<a href="{% url 'core:project-details' role.project.owner.username role.project.name %}">{{ role.project.name }}</a></li>
     {% empty %}
       <li>No roles</li>
     {% endfor %}
