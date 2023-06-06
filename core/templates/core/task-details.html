@@ -31,7 +31,9 @@
     {% for collaborator in collaborators %}
       <li>
         <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
+        {% if task.status != task.TERMINATED %}
         <a class = "action" href="{% url 'core:task-revoke' task.project.owner.username task.project.name task.name collaborator.username %}">Revoke</a>
+        {% endif %}
       </li>
     {% empty %}
       <li>No collaborators</li>
@@ -39,10 +41,12 @@
   </ul>
   <div class = "section">Competent Project Collaborators:</div>
   <ul>
-    {% for collaborator in competent_collaborators %}
+    {% for collaborator in competent_collaborators.distinct %}
       <li>
         <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
+        {% if task.status != task.TERMINATED %}
         <a class = "action" href="{% url 'core:task-assign' task.project.owner.username task.project.name task.name collaborator.username %}">Assign</a>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>
@@ -58,7 +62,7 @@
       <li><a href="{% url 'core:task-reject' task.project.owner.username task.project.name task.name %}">Reject</a></li>
     {% endif %}
   {% endif %}
-  {% if request.user in task.collaborators.all %}
+  {% if request.user in task.active_collaborators %}
     {% if task.status == task.ASSIGNED %}
     <li><a href="{% url 'core:task-start' task.project.owner.username task.project.name task.name %}">Start</a></li>
     {% endif %}
@@ -69,7 +73,7 @@
     <li><a href="{% url 'core:task-leave' task.project.owner.username task.project.name task.name %}">Leave</a></li>
     {% endif %}
   {% else %}
-    {% if request.user in task.project.collaborators and competence %}
+    {% if request.user in task.project.collaborators and competence and task.status != task.TERMINATED %}
       <li><a href="{% url 'core:task-join' task.project.owner.username task.project.name task.name %}">Join</a></li>
     {% endif %}
   {% endif %}

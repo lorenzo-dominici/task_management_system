@@ -22,6 +22,7 @@ urlpatterns = [
 
     path('<str:username>/<str:project_name>/edit/', edit_project, name='project-edit'),
     path('<str:username>/<str:project_name>/roles/<str:role_name>/request/', edit_request, name='request-new'),
+    path('<str:username>/<str:project_name>/roles/<str:role_name>/dismiss/<str:collaborator>', dismiss_role, name='role-dismiss'),
     path('<str:username>/<str:project_name>/roles/<str:role_name>/edit/', edit_role, name='role-edit'),
     path('<str:username>/<str:project_name>/tasks/<str:task_name>/edit/', edit_task, name='task-edit'),
     path('<str:username>/<str:project_name>/<str:task_name>/join', join_task, name='task-join'),
@@ -32,7 +33,6 @@ urlpatterns = [
     path('<str:username>/<str:project_name>/<str:task_name>/reject', reject_task, name='task-reject'),
     path('<str:username>/<str:project_name>/<str:task_name>/assign/<str:collaborator>', assign_task, name='task-assign'),
     path('<str:username>/<str:project_name>/<str:task_name>/revoke/<str:collaborator>', revoke_task, name='task-revoke'),
-
 
     path('<str:username>/', view_user, name='user-details'),
     path('<str:username>/<str:project_name>/', view_project, name='project-details'),

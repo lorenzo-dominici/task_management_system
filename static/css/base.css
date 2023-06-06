@@ -296,6 +296,11 @@ main > form > div > :not(label):focus {
     border-color: var(--highlight);
 }
 
+main > form > div > select > option[selected] {
+    background-color: transparent;
+    color: var(--highlight);
+}
+
 .helptext, .errorlist {
     display: none !important;
 }

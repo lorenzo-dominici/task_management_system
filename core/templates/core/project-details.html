@@ -24,7 +24,7 @@
   </ul>
   <div class = "section">Collaborators:</div>
   <ul>
-  {% for collaborator in project.collaborators %}
+  {% for collaborator in project.collaborators.distinct %}
     <li><a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a></li>
   {% empty %}
     <li>No collaborators</li>

@@ -9,8 +9,13 @@
 
   <div class = "section">Collaborators</div>
   <ul>
-    {% for collaborator in role.collaborators.all %}
-      <li><a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a></li>
+    {% for collaborator in role.active_collaborators %}
+      <li>
+        <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
+        {% if request.user == role.project.owner %}
+        <a class = "action dng" href="{% url 'core:role-dismiss' role.project.owner.username role.project.name role.name collaborator.username %}">Dismiss</a>
+        {% endif %}
+      </li>
     {% empty %}
       <li>No collaborators</li>
     {% endfor %}

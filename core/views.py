@@ -65,7 +65,7 @@ def view_task(request, task_name, username, project_name):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
     if not (request.user in task.project.collaborators and task.visibility == Task.PUBLIC) and request.user != task.project.owner:
         raise PermissionDenied
-    collaborators = task.collaborators.filter(assignation__dismissing_date__isnull = True)
+    collaborators = task.active_collaborators
     competence = task.is_competent(request.user)
     competent_collaborators = task.project.collaborators.filter(roles__in = task.roles.all()).distinct().exclude(username__in = collaborators.values_list('username', flat = True))
     return render(request, 'core/task-details.html', {'task': task, 'collaborators': collaborators, 'competence': competence, 'competent_collaborators': competent_collaborators})
@@ -153,12 +153,10 @@ def edit_request(request, username, project_name, role_name):
         return render(request, 'core/request-edit.html', {'form': form, 'edit': False})
         raise PermissionDenied
 
-
-
 @login_required
 def join_task(request, username, project_name, task_name):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
-    if request.user not in task.project.collaborators or task.collaborators.filter(username = request.user.username).exists():
+    if request.user not in task.project.collaborators or task.active_collaborators.filter(username = request.user.username).exists():
         raise PermissionDenied
     task.collaborators.add(request.user)
     if task.status == Task.CREATED or task.status == Task.ASSIGNED:
@@ -169,7 +167,7 @@ def join_task(request, username, project_name, task_name):
 @login_required
 def leave_task(request, username, project_name, task_name):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
-    if request.user in task.collaborators.distinct():
+    if request.user in task.active_collaborators:
         assignation = get_object_or_404(Assignation, task = task, collaborator = request.user)
         assignation.dismissing_date = timezone.now()
         assignation.save()
@@ -179,7 +177,7 @@ def leave_task(request, username, project_name, task_name):
 def assign_task(request, username, project_name, task_name, collaborator):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
     collaborator = get_object_or_404(get_user_model(), username = collaborator)
-    if request.user != task.project.owner or not task.project.collaborators.filter(username = collaborator.username).exists() or not task.is_competent(request.user):
+    if request.user != task.project.owner or not task.project.collaborators.filter(username = collaborator.username).exists() or not task.is_competent(collaborator):
         raise PermissionDenied
     if task.status == Task.CREATED or task.status == Task.ASSIGNED:
         task.status = Task.ASSIGNED
@@ -204,7 +202,7 @@ def revoke_task(request, username, project_name, task_name, collaborator):
 @login_required
 def start_task(request, username, project_name, task_name):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
-    if request.user not in task.collaborators.all() or task.status != Task.ASSIGNED:
+    if request.user not in task.active_collaborators or task.status != Task.ASSIGNED:
         raise PermissionDenied
     task.status = Task.STARTED
     task.start_date = timezone.now()
@@ -214,7 +212,7 @@ def start_task(request, username, project_name, task_name):
 @login_required
 def end_task(request, username, project_name, task_name):
     task = get_object_or_404(Task, name = task_name, project__name = project_name, project__owner__username = username)
-    if request.user not in task.collaborators.all() or task.status != Task.STARTED:
+    if request.user not in task.active_collaborators or task.status != Task.STARTED:
         raise PermissionDenied
     task.status = Task.TO_APPROVE
     task.request_date = timezone.now()
@@ -270,3 +268,16 @@ def revoke_request(request, request_id):
         raise PermissionDenied
     join_request.delete()
     return redirect('core:project-details', username = join_request.role.project.owner.username, project_name = join_request.role.project.name)
+
+@login_required
+def dismiss_role(request, username, project_name, role_name, collaborator):
+    role = get_object_or_404(Role, name = role_name, project__name = project_name, project__owner__username = username)
+    if request.user != role.project.owner:
+        raise PermissionDenied
+    collaborator = get_object_or_404(get_user_model(), username = collaborator)
+    collaboration = get_object_or_404(Collaboration, role = role, collaborator = collaborator)
+    if collaboration.dismissing_date is not None:
+        raise PermissionDenied
+    collaboration.dismissing_date = timezone.now()
+    collaboration.save()
+    return redirect('core:role-details', username = role.project.owner.username, project_name = role.project.name, role_name = role.name)

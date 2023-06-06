@@ -24,7 +24,7 @@ class RoleForm(forms.ModelForm):
             field.required = True
 
 class TaskForm(forms.ModelForm):
-    roles = forms.ModelMultipleChoiceField(queryset=Role.objects.none(), widget=FilteredSelectMultiple('Roles', is_stacked = False))
+    roles = forms.ModelMultipleChoiceField(queryset=Role.objects.none())
 
     class Meta:
         model = Task

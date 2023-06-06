@@ -41,7 +41,7 @@ class Project(models.Model):
     
     @property
     def collaborators(self):
-        return get_user_model().objects.filter(roles__project = self).all()
+        return  get_user_model().objects.filter(roles__project = self, collaboration__dismissing_date__isnull = True).all()
 
 class Role(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='roles')
@@ -59,6 +59,10 @@ class Role(models.Model):
     
     def is_deletable(self):
         return Collaboration.objects.filter(role = self).count() == 0
+    
+    @property
+    def active_collaborators(self):
+        return self.collaborators.filter(collaboration__dismissing_date__isnull = True).all()
     
 class Collaboration(models.Model):
     collaborator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT)
@@ -120,9 +124,13 @@ class Task(models.Model):
     
     def is_competent(self, collaborator):
         for role in collaborator.roles.filter(project = self.project):
-            if role in self.roles:
+            if role in self.roles.all():
                 return True
         return False
+    
+    @property
+    def active_collaborators(self):
+        return self.collaborators.filter(assignation__dismissing_date__isnull = True).all()
     
 class TaskRole(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
