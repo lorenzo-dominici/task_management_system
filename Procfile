@@ -1,0 +1,1 @@
+web:python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn task_management_system.wsgi --log-file -
