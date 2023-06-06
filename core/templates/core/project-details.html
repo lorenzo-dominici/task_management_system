@@ -17,7 +17,7 @@
     <li>
       <a href="{% url 'core:role-details' project.owner.username project.name role.name %}">{{ role.name }}</a>
       {% if role.project.owner == request.user %}
-        <a class = "action" href="{% url 'core:role-edit' project.owner.username project.name role.name %}">Edit</a>
+        <a class = "action wrn" href="{% url 'core:role-edit' project.owner.username project.name role.name %}">Edit</a>
       {% endif %}
     </li>
   {% endfor %}
@@ -34,11 +34,11 @@
 
 {% block right %}
   {% if request.user == project.owner %}
-  <li><a href="{% url 'core:project-edit' project.owner.username project.name %}">Edit Project</a></li>
-  <li><a href="{% url 'core:role-new' project.owner.username project.name %}">Create Role</a></li>
-  <li><a href="{% url 'core:task-new' project.owner.username project.name %}">Create Task</a></li>
+  <li><a class="wrn" href="{% url 'core:project-edit' project.owner.username project.name %}">Edit Project</a></li>
+  <li><a class="scs" href="{% url 'core:role-new' project.owner.username project.name %}">Create Role</a></li>
+  <li><a class="scs" href="{% url 'core:task-new' project.owner.username project.name %}">Create Task</a></li>
   {% endif %}
   {% if request.user.is_authenticated %}
-  <li><a href="{% url 'core:project-new' %}">Create Project</a></li>
+  <li><a class="scs" href="{% url 'core:project-new' %}">Create Project</a></li>
   {% endif %}
 {% endblock right %}

@@ -19,3 +19,8 @@
   </ul>
 {% endblock content %}
 
+{% block right %}
+  {% if request.user.is_authenticated %}
+  <li><a class="scs" href="{% url 'core:project-new' %}">Create Project</a></li>
+  {% endif %}
+{% endblock right %}

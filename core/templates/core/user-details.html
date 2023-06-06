@@ -22,9 +22,9 @@
 
 {% block right %}
   {% if user == request.user %}
-  <li><a href="{% url 'password_change' %}">Change Password</a></li>
-  <li><a href="{% url 'logout' %}">Logout</a></li>
+  <li><a class ="wrn" href="{% url 'password_change' %}">Change Password</a></li>
+  <li><a class = "dng" href="{% url 'logout' %}">Logout</a></li>
   <li><span></span></li>
-  <li><a href="{% url 'core:project-new' %}">Create Project</a></li>
+  <li><a class = "scs" href="{% url 'core:project-new' %}">Create Project</a></li>
   {% endif %}
 {% endblock right %}

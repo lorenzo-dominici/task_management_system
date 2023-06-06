@@ -13,9 +13,9 @@
 
 {% block right %}
 {% if request.user == join_request.receiver %}
-<li><a class = "action scs" href="{% url 'core:request-accept' join_request.id %}">Accept</a></li>
-<li><a class = "action dng" href="{% url 'core:request-reject' join_request.id %}">Reject</a></li>
+<li><a class = "scs" href="{% url 'core:request-accept' join_request.id %}">Accept</a></li>
+<li><a class = "dng" href="{% url 'core:request-reject' join_request.id %}">Reject</a></li>
 {% else %}
-<li><a class = "action dng" href="{% url 'core:request-revoke' join_request.id %}">Revoke</a></li>
+<li><a class = "dng" href="{% url 'core:request-revoke' join_request.id %}">Revoke</a></li>
 {% endif %}
 {% endblock right %}

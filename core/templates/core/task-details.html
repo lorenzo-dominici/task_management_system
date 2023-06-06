@@ -19,7 +19,7 @@
       <li>
         <a href="{% url 'core:role-details' task.project.owner.username task.project.name role.name %}">{{ role.name }}</a>
         {% if role.project.owner == request.user %}
-          <a class = "action" href="{% url 'core:role-edit' task.project.owner.username task.project.name role.name %}">Edit</a>
+          <a class = "action wrn" href="{% url 'core:role-edit' task.project.owner.username task.project.name role.name %}">Edit</a>
         {% endif %}
       </li>
     {% empty %}
@@ -31,8 +31,8 @@
     {% for collaborator in collaborators %}
       <li>
         <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
-        {% if task.status != task.TERMINATED %}
-        <a class = "action" href="{% url 'core:task-revoke' task.project.owner.username task.project.name task.name collaborator.username %}">Revoke</a>
+        {% if task.status != task.TERMINATED and request.user == task.project.owner %}
+        <a class = "action dng" href="{% url 'core:task-revoke' task.project.owner.username task.project.name task.name collaborator.username %}">Revoke</a>
         {% endif %}
       </li>
     {% empty %}
@@ -45,7 +45,7 @@
       <li>
         <a href="{% url 'core:user-details' collaborator.username %}">{{ collaborator.username }}</a>
         {% if task.status != task.TERMINATED %}
-        <a class = "action" href="{% url 'core:task-assign' task.project.owner.username task.project.name task.name collaborator.username %}">Assign</a>
+        <a class = "action scs" href="{% url 'core:task-assign' task.project.owner.username task.project.name task.name collaborator.username %}">Assign</a>
         {% endif %}
       </li>
     {% endfor %}
@@ -54,27 +54,27 @@
 
 {% block right %}
   {% if request.user == task.project.owner %}
-  <li><a href="{% url 'core:task-edit' task.project.owner.username task.project.name task.name %}">Edit Task</a></li>
-  <li><a href="{% url 'core:task-new' task.project.owner.username task.project.name %}">Create Task</a></li>
+  <li><a class = "wrn" href="{% url 'core:task-edit' task.project.owner.username task.project.name task.name %}">Edit Task</a></li>
+  <li><a class = "scs" href="{% url 'core:task-new' task.project.owner.username task.project.name %}">Create Task</a></li>
     {% if task.status == task.TO_APPROVE %}
       <li><span></span></li>
-      <li><a href="{% url 'core:task-approve' task.project.owner.username task.project.name task.name %}">Approve</a></li>
-      <li><a href="{% url 'core:task-reject' task.project.owner.username task.project.name task.name %}">Reject</a></li>
+      <li><a class = "scs" href="{% url 'core:task-approve' task.project.owner.username task.project.name task.name %}">Approve</a></li>
+      <li><a class = "dng" href="{% url 'core:task-reject' task.project.owner.username task.project.name task.name %}">Reject</a></li>
     {% endif %}
   {% endif %}
   {% if request.user in task.active_collaborators %}
     {% if task.status == task.ASSIGNED %}
-    <li><a href="{% url 'core:task-start' task.project.owner.username task.project.name task.name %}">Start</a></li>
+    <li><a class = "scs" href="{% url 'core:task-start' task.project.owner.username task.project.name task.name %}">Start</a></li>
     {% endif %}
     {% if task.status == task.STARTED %}
-    <li><a href="{% url 'core:task-end' task.project.owner.username task.project.name task.name %}">End</a></li>
+    <li><a class = "dng" href="{% url 'core:task-end' task.project.owner.username task.project.name task.name %}">End</a></li>
     {% endif %}
     {% if request.user in collaborators and task.status != task.TERMINATED %}
-    <li><a href="{% url 'core:task-leave' task.project.owner.username task.project.name task.name %}">Leave</a></li>
+    <li><a class = "dng" href="{% url 'core:task-leave' task.project.owner.username task.project.name task.name %}">Leave</a></li>
     {% endif %}
   {% else %}
     {% if request.user in task.project.collaborators and competence and task.status != task.TERMINATED %}
-      <li><a href="{% url 'core:task-join' task.project.owner.username task.project.name task.name %}">Join</a></li>
+      <li><a class = "scs" href="{% url 'core:task-join' task.project.owner.username task.project.name task.name %}">Join</a></li>
     {% endif %}
   {% endif %}
 
